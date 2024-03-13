@@ -60,6 +60,18 @@ class FeedReaderDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         )
     }
 
+//    It gets a readable instance of the SQLite database.
+//    It defines a projection, which specifies the columns that should be included for each row in the result set.
+//    It defines a selection criteria, which is a SQL WHERE clause that determines which rows to include in the result set.
+//    In this case, it's looking for rows where the title is "My Title".
+//    It defines the arguments for the selection criteria. In this case, it's the string "My Title".
+//    It defines a sort order, which is a SQL ORDER BY clause that determines the order of the rows in the result set.
+//    In this case, it's sorting the rows by the subtitle in descending order.
+//    It calls the query method on the database instance, passing in the table name,
+//    the projection, the selection criteria, the selection arguments, and the sort order.
+//    This method queries the database and returns a Cursor object that can be used to navigate
+//    through the rows in the result set.
+
     // Delete rows where the title is "My Title"
     fun deleteMyTitle(): Int {
         val db = this.writableDatabase
