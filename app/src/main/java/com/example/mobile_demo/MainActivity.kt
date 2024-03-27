@@ -1,6 +1,11 @@
 package com.example.mobile_demo
 
+import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
@@ -15,6 +20,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.Button
 import android.widget.TextView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import android.location.Location
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -22,8 +32,14 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
+    // media player
     private var mediaPlayer: MediaPlayer? = null
     private var wifiLock: WifiManager.WifiLock? = null
+
+    // location
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
+
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // media player
         val button1 = findViewById<Button>(R.id.button1)
         button1.setOnClickListener {
             mediaPlayer = MediaPlayer.create(this, R.raw.theme)
@@ -97,5 +114,34 @@ class MainActivity : AppCompatActivity() {
             mediaPlayer?.release()
             mediaPlayer = null
         }
+
+        // location
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(ACCESS_COARSE_LOCATION), 1)
+        }
+
+        mFusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                val locationView = findViewById<TextView>(R.id.locationView)
+                if (location != null) {
+                    locationView.text = "Latitude: ${location.latitude}, Longitude: ${location.longitude}"
+                    Log.d("LocationUpdate", "Location updated: Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+                } else {
+                    locationView.text = "Location is null"
+                    Log.d("LocationUpdate", "Location is null")
+                }
+            }
+
+        // map
+        val mapsButton = findViewById<Button>(R.id.button_maps)
+        mapsButton.setOnClickListener {
+            val intent = Intent(this, MapsActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 }
