@@ -1,8 +1,13 @@
 package com.example.mobile_demo
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.net.Uri
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Environment
+import android.os.PowerManager
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +22,8 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
+    private var mediaPlayer: MediaPlayer? = null
+    private var wifiLock: WifiManager.WifiLock? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,184 +34,68 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Load data from SharedPreferences
-        loadData()
-
-        // Save data to SharedPreferences when button is clicked
-        val sharedPrefButton = findViewById<Button>(R.id.sharedPrefButton)
-        sharedPrefButton.setOnClickListener {
-            saveData()
+        val button1 = findViewById<Button>(R.id.button1)
+        button1.setOnClickListener {
+            mediaPlayer = MediaPlayer.create(this, R.raw.theme)
+            mediaPlayer?.start()
         }
 
-        // Load data from Internal Storage
-        val internalStorageTextView = findViewById<TextView>(R.id.internalStorageTextView)
-        internalStorageTextView.text = readFile("internalStorage.txt")
+        val button2 = findViewById<Button>(R.id.button2)
+        button2.setOnClickListener {
+            val myUri = Uri.parse("https://samplelib.com/lib/preview/mp3/sample-6s.mp3")
 
-        // Save data to Internal Storage when button is clicked
-        val internalStorageButton = findViewById<Button>(R.id.internalStorageButton)
-        internalStorageButton.setOnClickListener {
-            writeFile("internalStorage.txt", "Hello, Internal Storage!")
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                try {
+                    setDataSource(applicationContext, myUri)
+                    prepare() // might take long! (for buffering, etc)
+                    start()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
 
-        // Checks if external storage is available for read and write
-        fun isExternalStorageWritable(): Boolean {
-            val state = Environment.getExternalStorageState()
-            return Environment.MEDIA_MOUNTED == state
+        val button3 = findViewById<Button>(R.id.button3)
+        button3.setOnClickListener {
+            val url = "https://samplelib.com/lib/preview/mp3/sample-9s.mp3"
+
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                try {
+                    setDataSource(url)
+                    prepare() // might take long! (for buffering, etc)
+                    start()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                mediaPlayer?.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+            }
+
+            val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiLock = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, "mylock")
+            } else {
+                wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "mylock")
+            }
+            wifiLock?.acquire()
+
         }
 
-        // Checks if external storage is available to at least read
-        fun isExternalStorageReadable(): Boolean {
-            val state = Environment.getExternalStorageState()
-            return Environment.MEDIA_MOUNTED == state || Environment.MEDIA_MOUNTED_READ_ONLY == state
-        }
-
-        var albumDir: File? = null
-
-        if (isExternalStorageWritable() && isExternalStorageReadable()) {
-            albumDir = getAlbumStorageDir("MyAlbum")
-        } else {
-            Log.e("MainActivity", "External storage not available")
-        }
-
-        // Save data to External Storage when button is clicked
-        val externalStorageButton = findViewById<Button>(R.id.externalStorageButton)
-        externalStorageButton.setOnClickListener {
-            val file = File(albumDir, "externalStorage.txt")
-            file.writeText("Heyo, External Storage!")
-            Log.i("MainActivity", "File path: ${file.absolutePath}")
-        }
-
-        // Load data from External Storage
-        val externalStorageTextView = findViewById<TextView>(R.id.externalStorageTextView)
-        val file = File(albumDir, "externalStorage.txt")
-        externalStorageTextView.text = file.readText()
-
-        val dbHelper = FeedReaderDbHelper(this)
-
-        val insertButton = findViewById<Button>(R.id.insertButton)
-        val deleteButton = findViewById<Button>(R.id.deleteButton)
-        val queryTextView = findViewById<TextView>(R.id.queryTextView)
-
-        insertButton.setOnClickListener {
-            // Insert a new row
-            val newRowId = dbHelper.insertData("My Title", "My Subtitle")
-            Log.d("MainActivity", "Inserted new row with ID: $newRowId")
-
-            // Query for rows where the title is "My Title"
-            query(dbHelper, queryTextView)
-        }
-
-        deleteButton.setOnClickListener {
-            // Delete rows where the title is "My Title"
-            val deletedRows = dbHelper.deleteMyTitle()
-            Log.d("MainActivity", "Deleted $deletedRows rows")
-
-            // Query for rows where the title is "My Title"
-            query(dbHelper, queryTextView)
-        }
-
-    }
-
-    fun query(dbHelper: FeedReaderDbHelper, queryTextView: TextView) {
-        // Query for rows where the title is "My Title"
-        val cursor = dbHelper.queryMyTitle()
-        val stringBuilder = StringBuilder()
-        while (cursor.moveToNext()) {
-            val itemId = cursor.getLong(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.ID))
-            val title = cursor.getString(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_TITLE))
-            val subtitle = cursor.getString(cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_SUBTITLE))
-            stringBuilder.append("Row ID: $itemId, Title: $title, Subtitle: $subtitle\n")
-        }
-        cursor.close()
-        // Update the TextView with the queried data
-        queryTextView.text = stringBuilder.toString()
-    }
-
-
-    // 4 modes: MODE_PRIVATE, MODE_WORLD_READABLE, MODE_WORLD_WRITEABLE, MODE_MULTI_PROCESS
-    // Save data to SharedPreferences
-    private fun saveData() {
-        val sharedPref = getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
-        with (sharedPref.edit()) {
-            putString("myKey", "Hello, SharedPreferences!")
-            putString("myKey1", "Heyo, SharedPreferences 1!")
-            putString("myKey2", "Howdy, SharedPreferences 2!")
-            apply()
+        val stopButton = findViewById<Button>(R.id.stopButton)
+        stopButton.setOnClickListener {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
         }
     }
-
-    // Load data from SharedPreferences
-    private fun loadData() {
-        val sharedPref = getSharedPreferences("myPrefs", Context.MODE_PRIVATE)
-        val defaultValue = "DefaultString"
-        // random a integer 0 1 or 2
-        val randomInt = (0..2).random()
-        val myString = when (randomInt) {
-            0 -> sharedPref.getString("myKey", defaultValue)
-            1 -> sharedPref.getString("myKey1", defaultValue)
-            2 -> sharedPref.getString("myKey2", defaultValue)
-            else -> defaultValue
-        }
-
-        // display myString in a TextView
-        val sharedPrefsTextView = findViewById<TextView>(R.id.sharedPrefsTextView)
-        sharedPrefsTextView.text = myString
-    }
-
-    // Save data to Internal Storage
-    fun writeFile(filename: String, data: String) {
-        val fileOutputStream: FileOutputStream
-        try {
-            fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE)
-            fileOutputStream.write(data.toByteArray())
-            fileOutputStream.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    // Load data from Internal Storage
-    fun readFile(filename: String): String {
-        val file = File(filesDir, filename)
-        if (!file.exists()) {
-            return "File not found"
-        }
-
-        var fileInputStream: FileInputStream? = null
-        try {
-            fileInputStream = openFileInput(filename)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        val inputStreamReader = InputStreamReader(fileInputStream)
-        val bufferedReader = BufferedReader(inputStreamReader)
-        val stringBuilder: StringBuilder = StringBuilder()
-        var text: String? = null
-        while (run {
-                text = bufferedReader.readLine() // readLine() returns null if no more
-                text
-            } != null) {
-            stringBuilder.append(text) // if text is not null, append it to stringBuilder
-        }
-        fileInputStream?.close()
-        return stringBuilder.toString()
-    }
-
-    fun getAlbumStorageDir(albumName: String): File {
-        // Get the directory for the user's public pictures directory.
-        val file = File(Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES), albumName)
-        if (!file.mkdirs()) {
-            Log.e("MainActivity", "Directory not created")
-        }
-        return file
-    }
-
-//    fun deleteExternalStoragePrivateFile() {
-//        // Get path for the file on external storage. If external
-//        // storage is not currently mounted this will fail.
-//        val file = File(getExternalFilesDir(null), "externalStorage.txt")
-//        file.delete()
-//    }
 }

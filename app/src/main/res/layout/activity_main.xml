@@ -9,134 +9,47 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/sharedPrefButton"
+        android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="#03A9F4"
-        android:text="Change SharedPrefs"
-        android:textAlignment="center"
-        android:textColorLink="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="108dp"
+        android:text="Play Raw"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.161" />
-
-    <TextView
-        android:id="@+id/sharedPrefsTextView"
-        android:layout_width="256dp"
-        android:layout_height="38dp"
-        android:background="#03A9F4"
-        android:gravity="center"
-        android:text="SharedPrefs"
-        android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/sharedPrefButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.837" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/internalStorageButton"
+        android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="#03A9F4"
-        android:text="Change Internal Storage"
-        android:textAlignment="center"
-        android:textColorLink="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="36dp"
+        android:text="Play Uri"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.551"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.364" />
-
-    <TextView
-        android:id="@+id/internalStorageTextView"
-        android:layout_width="256dp"
-        android:layout_height="38dp"
-        android:background="#03A9F4"
-        android:gravity="center"
-        android:text="Internal Storage"
-        android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/internalStorageButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.967" />
+        app:layout_constraintTop_toBottomOf="@+id/button1" />
 
     <Button
-        android:id="@+id/externalStorageButton"
+        android:id="@+id/button3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="#03A9F4"
-        android:text="Change External Storage"
-        android:textAlignment="center"
-        android:textColorLink="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="36dp"
+        android:text="Play URL"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.582" />
-
-    <TextView
-        android:id="@+id/externalStorageTextView"
-        android:layout_width="256dp"
-        android:layout_height="38dp"
-        android:layout_marginBottom="12dp"
-        android:background="#03A9F4"
-        android:gravity="center"
-        android:text="External Storage"
-        android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        app:layout_constraintBottom_toTopOf="@+id/externalStorageButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
 
     <Button
-        android:id="@+id/insertButton"
+        android:id="@+id/stopButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="#03A9F4"
-        android:text="Insert Row"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/queryTextView"
-        app:layout_constraintHorizontal_bias="0.597"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.803" />
-
-    <Button
-        android:id="@+id/deleteButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#03A9F4"
-        android:text="Delete"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/queryTextView"
-        app:layout_constraintHorizontal_bias="0.608"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/insertButton"
-        app:layout_constraintVertical_bias="0.2" />
-
-    <TextView
-        android:id="@+id/queryTextView"
-        android:layout_width="171dp"
-        android:layout_height="134dp"
-        android:backgroundTint="#03A9F4"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="32dp"
+        android:text="Stop"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.901" />
+        app:layout_constraintTop_toBottomOf="@+id/button3" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
