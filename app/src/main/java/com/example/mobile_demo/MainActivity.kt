@@ -23,6 +23,8 @@ import android.widget.TextView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.location.Location
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.BufferedReader
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     // location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,6 +126,20 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this,
                 arrayOf(ACCESS_COARSE_LOCATION), 1)
         }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            // Request the permissions
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+            }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            // Request the permissions
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), 1)
+            }
 
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
